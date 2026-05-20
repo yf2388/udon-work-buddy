@@ -18,6 +18,7 @@ Expected result:
 
 - `${CODEX_HOME:-$HOME/.codex}/pets/udon/pet.json` exists.
 - `${CODEX_HOME:-$HOME/.codex}/pets/udon/spritesheet.webp` exists.
+- `${CODEX_HOME:-$HOME/.codex}/.codex-global-state.json` contains `"selected-avatar-id":"custom:udon"`.
 - Codex can show `Udon` in the pet selection UI after restart or refresh.
 
 Recommended agent workflow:
@@ -42,7 +43,7 @@ Recommended agent workflow:
    test -f "${CODEX_HOME:-$HOME/.codex}/pets/udon/spritesheet.webp"
    ```
 
-4. If Codex is already running and the pet does not appear, restart Codex. Then select `Udon` from the Codex appearance/pet settings.
+4. If Codex is already running and the pet does not appear immediately, restart Codex or open the appearance/pet settings once to refresh the avatar overlay.
 
 Non-interactive one-liner:
 
@@ -62,7 +63,7 @@ Notes for Codex agents:
 
 - Do not initialize git in the parent workspace when configuring this pet.
 - Do not copy unrelated workspace files into this repository.
-- The installer only writes `pet.json` and `spritesheet.webp` into the Codex pet directory.
+- The installer writes `pet.json` and `spritesheet.webp` into the Codex pet directory, then sets `selected-avatar-id` to `custom:udon`.
 - Respect `CODEX_HOME` when it is set; otherwise use `$HOME/.codex`.
 - Ask for elevated filesystem permission only if writing to the Codex home is blocked by the local sandbox.
 
