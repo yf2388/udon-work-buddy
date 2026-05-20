@@ -2,6 +2,70 @@
 
 Udon Work Buddy is a custom Codex/OpenPet-style desktop pet package based on Udon, a gray-black Shih Tzu. It includes a Codex-compatible 8x9 spritesheet, manifest, preview GIFs, and the local build script used to regenerate the pet atlas.
 
+Repository:
+
+```text
+git@github.com:yf2388/udon-work-buddy.git
+```
+
+## Codex Auto Configuration
+
+Use this section when another Codex agent only receives the GitHub repository address and needs to configure the pet automatically.
+
+Goal: install the `Udon` custom desktop pet into the active Codex home so the local Codex app can load it.
+
+Expected result:
+
+- `${CODEX_HOME:-$HOME/.codex}/pets/udon/pet.json` exists.
+- `${CODEX_HOME:-$HOME/.codex}/pets/udon/spritesheet.webp` exists.
+- Codex can show `Udon` in the pet selection UI after restart or refresh.
+
+Recommended agent workflow:
+
+1. Clone the repository into a temporary or user-approved workspace.
+
+   ```bash
+   git clone git@github.com:yf2388/udon-work-buddy.git
+   cd udon-work-buddy
+   ```
+
+2. Run the installer from the repository root.
+
+   ```bash
+   ./tools/install_udon_pet.sh
+   ```
+
+3. Verify the installed files.
+
+   ```bash
+   test -f "${CODEX_HOME:-$HOME/.codex}/pets/udon/pet.json"
+   test -f "${CODEX_HOME:-$HOME/.codex}/pets/udon/spritesheet.webp"
+   ```
+
+4. If Codex is already running and the pet does not appear, restart Codex. Then select `Udon` from the Codex appearance/pet settings.
+
+Non-interactive one-liner:
+
+```bash
+git clone git@github.com:yf2388/udon-work-buddy.git && cd udon-work-buddy && ./tools/install_udon_pet.sh
+```
+
+If SSH access to GitHub is not configured, use the HTTPS URL instead:
+
+```bash
+git clone https://github.com/yf2388/udon-work-buddy.git
+cd udon-work-buddy
+./tools/install_udon_pet.sh
+```
+
+Notes for Codex agents:
+
+- Do not initialize git in the parent workspace when configuring this pet.
+- Do not copy unrelated workspace files into this repository.
+- The installer only writes `pet.json` and `spritesheet.webp` into the Codex pet directory.
+- Respect `CODEX_HOME` when it is set; otherwise use `$HOME/.codex`.
+- Ask for elevated filesystem permission only if writing to the Codex home is blocked by the local sandbox.
+
 ## Preview
 
 ![Udon contact sheet](codex-pets/udon/contact-sheet.png)
