@@ -67,6 +67,91 @@ Notes for Codex agents:
 - Respect `CODEX_HOME` when it is set; otherwise use `$HOME/.codex`.
 - Ask for elevated filesystem permission only if writing to the Codex home is blocked by the local sandbox.
 
+## Installation Pitfalls
+
+These are the common issues that made the first installation look like it had not worked.
+
+### Udon files exist, but Codex still shows the old pet
+
+Installing a custom pet has two separate parts:
+
+1. Copy the custom pet files into `${CODEX_HOME:-$HOME/.codex}/pets/udon/`.
+2. Set the persisted Codex avatar selection to `custom:udon`.
+
+If only the files are copied, Codex can discover Udon in the custom pet list, but the active pet may still fall back to the built-in `codex` avatar. The installer handles both steps automatically.
+
+Verify the selected pet:
+
+```bash
+python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+
+state_file = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / ".codex-global-state.json"
+state = json.loads(state_file.read_text()).get("electron-persisted-atom-state", {})
+print(state.get("selected-avatar-id"))
+PY
+```
+
+Expected output:
+
+```text
+custom:udon
+```
+
+If the value is missing or different, run:
+
+```bash
+./tools/install_udon_pet.sh
+```
+
+### Running Codex may cache the old overlay
+
+The floating desktop pet overlay can keep the old avatar in memory while Codex is already running. After installation, if the screen still shows the old pet:
+
+1. Open Codex appearance/pet settings once to force a refresh, or
+2. Restart Codex.
+
+The persisted setting should be checked before assuming the spritesheet is wrong.
+
+### Running Codex can overwrite a direct state-file edit
+
+Codex stores `selected-avatar-id` in its persisted atom state under `.codex-global-state.json`, but the running app also keeps this state in memory. If a script edits `.codex-global-state.json` while Codex is already running, the app may later flush its old in-memory value back to disk and remove the new `custom:udon` selection.
+
+The most reliable sequence is:
+
+1. Quit Codex.
+2. Run `./tools/install_udon_pet.sh`.
+3. Start Codex again.
+
+If Codex must stay open, run the installer, then immediately open Appearance/Pet settings or restart Codex if the overlay still shows the old pet.
+
+Check whether Codex rewrote the value:
+
+```bash
+python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+
+state_file = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / ".codex-global-state.json"
+state = json.loads(state_file.read_text()).get("electron-persisted-atom-state", {})
+print(state.get("selected-avatar-id"))
+PY
+```
+
+### Manual copy is not enough
+
+This command only installs the asset files:
+
+```bash
+mkdir -p "${CODEX_HOME:-$HOME/.codex}/pets/udon"
+cp codex-pets/udon/pet.json codex-pets/udon/spritesheet.webp "${CODEX_HOME:-$HOME/.codex}/pets/udon/"
+```
+
+It does not select Udon as the active pet. Prefer the installer unless you also update `.codex-global-state.json` yourself.
+
 ## Preview
 
 ![Udon contact sheet](codex-pets/udon/contact-sheet.png)
@@ -99,7 +184,7 @@ Rows:
 8. `running` / working
 9. `review`
 
-## Install
+## Manual Install
 
 From this repository root:
 
@@ -114,7 +199,7 @@ mkdir -p "${CODEX_HOME:-$HOME/.codex}/pets/udon"
 cp codex-pets/udon/pet.json codex-pets/udon/spritesheet.webp "${CODEX_HOME:-$HOME/.codex}/pets/udon/"
 ```
 
-Then restart Codex if the pet list does not refresh, and choose `Udon` from Settings -> Appearance -> Pet.
+If using manual copy, also set `selected-avatar-id` to `custom:udon` in `${CODEX_HOME:-$HOME/.codex}/.codex-global-state.json`, or choose `Udon` from Settings -> Appearance -> Pet. Then restart Codex if the avatar overlay does not refresh.
 
 ## Rebuild
 

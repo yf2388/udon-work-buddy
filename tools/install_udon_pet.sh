@@ -4,6 +4,11 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 pet_dir="${CODEX_HOME:-$HOME/.codex}/pets/udon"
 state_file="${CODEX_HOME:-$HOME/.codex}/.codex-global-state.json"
+codex_running=0
+
+if ps -axo command | grep -F "/Applications/Codex.app/Contents/MacOS/Codex" | grep -v grep >/dev/null 2>&1; then
+  codex_running=1
+fi
 
 mkdir -p "$pet_dir"
 cp "$repo_root/codex-pets/udon/pet.json" "$repo_root/codex-pets/udon/spritesheet.webp" "$pet_dir/"
@@ -32,3 +37,7 @@ fi
 
 echo "Installed Udon pet to $pet_dir"
 echo "Selected Codex avatar id: custom:udon"
+
+if [ "$codex_running" -eq 1 ]; then
+  echo "Codex is currently running. Restart Codex or open Appearance/Pet settings if the old pet remains visible."
+fi
