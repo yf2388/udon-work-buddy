@@ -1,0 +1,8 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+codex-pets/udon/spritesheet.png
+codex-pets/udon/frames/
+codex-pets/udon/udon-codex-pet.zip
