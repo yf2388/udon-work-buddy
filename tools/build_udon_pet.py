@@ -349,6 +349,130 @@ def add_tail_wag(canvas: Image.Image, frame: int) -> None:
     draw.arc((x - 10, y - 28 + offset, x + 22, y + 12 + offset), 250, 40, fill=(26, 27, 28, 230), width=5)
 
 
+def add_waiting_tail_swish(canvas: Image.Image, frame: int) -> None:
+    draw = ImageDraw.Draw(canvas)
+    # Draw this before the body so the tail reads as attached behind Udon.
+    tail_boxes = [
+        (132, 121, 176, 165, 210, 310),
+        (138, 112, 181, 155, 225, 330),
+        (134, 117, 178, 161, 215, 320),
+        (119, 112, 164, 157, 205, 305),
+        (112, 121, 157, 166, 195, 295),
+        (124, 118, 168, 162, 205, 310),
+    ]
+    x0, y0, x1, y1, start, end = tail_boxes[frame]
+    draw.arc((x0, y0, x1, y1), start, end, fill=(8, 9, 10, 245), width=11)
+    draw.arc((x0 + 2, y0 + 2, x1 - 3, y1 - 3), start, end, fill=(42, 42, 43, 245), width=7)
+    draw.arc((x0 + 6, y0 + 7, x1 - 8, y1 - 8), start + 4, end - 3, fill=(185, 181, 170, 155), width=2)
+
+
+def add_waiting_paw_tap(canvas: Image.Image, frame: int) -> None:
+    if frame not in {1, 2, 4, 5}:
+        return
+    draw = ImageDraw.Draw(canvas)
+    x = 63 if frame in {1, 2} else 118
+    lift = -5 if frame in {2, 5} else -2
+    draw_pixel_ellipse(draw, (x, 163 + lift, x + 24, 181 + lift), (246, 240, 224, 242))
+    draw.arc((x - 1, 162 + lift, x + 25, 182 + lift), 180, 360, fill=(8, 9, 10, 235), width=2)
+
+
+def add_front_run_shadow(canvas: Image.Image, frame: int) -> None:
+    draw = ImageDraw.Draw(canvas)
+    widths = [92, 80, 68, 82, 94, 76]
+    width = widths[frame]
+    draw.ellipse(
+        ((CELL_W - width) // 2, 188, (CELL_W + width) // 2, 199),
+        fill=(18, 22, 20, 58),
+    )
+
+
+def add_front_run_tail(canvas: Image.Image, frame: int) -> None:
+    draw = ImageDraw.Draw(canvas)
+    boxes = [
+        (132, 118, 176, 162, 220, 335),
+        (119, 110, 160, 151, 190, 305),
+        (128, 113, 171, 156, 210, 325),
+        (139, 112, 181, 154, 230, 345),
+        (127, 119, 170, 162, 210, 325),
+        (116, 116, 158, 159, 195, 310),
+    ]
+    x0, y0, x1, y1, start, end = boxes[frame]
+    draw.arc((x0, y0, x1, y1), start, end, fill=(8, 9, 10, 235), width=9)
+    draw.arc((x0 + 2, y0 + 2, x1 - 2, y1 - 2), start, end, fill=(44, 44, 45, 235), width=6)
+
+
+def add_front_run_paws(canvas: Image.Image, frame: int) -> None:
+    draw = ImageDraw.Draw(canvas)
+    # Alternating four-beat gait: front paws reach forward while rear paws tuck in.
+    paw_sets = [
+        [(55, 165, 22, 15), (118, 173, 24, 14), (72, 184, 20, 12), (105, 184, 20, 12)],
+        [(48, 173, 23, 14), (124, 164, 23, 15), (69, 181, 20, 12), (108, 187, 20, 12)],
+        [(59, 181, 22, 13), (113, 176, 22, 13), (65, 166, 20, 13), (114, 184, 20, 12)],
+        [(70, 174, 22, 14), (102, 165, 24, 15), (58, 184, 20, 12), (119, 181, 20, 12)],
+        [(55, 163, 23, 15), (119, 174, 23, 14), (73, 186, 20, 12), (104, 183, 20, 12)],
+        [(47, 171, 22, 14), (126, 166, 23, 15), (68, 184, 20, 12), (110, 186, 20, 12)],
+    ]
+    for index, (x, y, w, h) in enumerate(paw_sets[frame]):
+        fill = (248, 242, 226, 250) if index < 2 else (34, 34, 35, 235)
+        draw_pixel_ellipse(draw, (x, y, x + w, y + h), fill)
+        draw.arc((x - 1, y - 1, x + w + 1, y + h + 1), 180, 360, fill=(7, 8, 9, 235), width=2)
+    for x, y in [(38, 176), (147, 176)]:
+        if frame in {1, 3, 5}:
+            draw.line((x, y, x - 10 if x < 96 else x + 10, y + 2), fill=(91, 104, 98, 75), width=2)
+
+
+def add_side_run_shadow(canvas: Image.Image, frame: int) -> None:
+    draw = ImageDraw.Draw(canvas)
+    widths = [92, 76, 86, 108, 88, 78]
+    width = widths[frame]
+    draw.ellipse(
+        (44, 187, 44 + width, 199),
+        fill=(18, 22, 20, 60),
+    )
+
+
+def add_side_run_paws(canvas: Image.Image, frame: int) -> None:
+    draw = ImageDraw.Draw(canvas)
+    # Explicit gallop cycle. The generated dog body carries the face/harness;
+    # these paws make the running beat readable even at pet-overlay size.
+    paw_sets = [
+        [(58, 171, 26, 13), (119, 168, 25, 13), (79, 185, 22, 11), (105, 186, 22, 11)],
+        [(49, 181, 24, 12), (130, 177, 25, 12), (78, 166, 21, 12), (111, 166, 21, 12)],
+        [(63, 187, 24, 11), (111, 187, 24, 11), (69, 171, 22, 12), (125, 169, 22, 12)],
+        [(43, 169, 29, 13), (136, 170, 30, 13), (75, 184, 23, 11), (105, 184, 23, 11)],
+        [(61, 174, 25, 13), (121, 181, 24, 12), (76, 166, 22, 12), (113, 188, 22, 10)],
+        [(50, 183, 24, 12), (131, 176, 26, 12), (82, 170, 21, 12), (108, 168, 21, 12)],
+    ]
+    for index, (x, y, w, h) in enumerate(paw_sets[frame]):
+        fill = (247, 241, 225, 250) if index in {0, 1} else (28, 28, 29, 235)
+        draw_pixel_ellipse(draw, (x, y, x + w, y + h), fill)
+        draw.arc((x - 1, y - 1, x + w + 1, y + h + 1), 180, 360, fill=(7, 8, 9, 235), width=2)
+
+
+def add_side_run_tail(canvas: Image.Image, frame: int) -> None:
+    draw = ImageDraw.Draw(canvas)
+    boxes = [
+        (123, 100, 171, 142, 210, 340),
+        (124, 88, 176, 130, 215, 345),
+        (122, 94, 173, 136, 210, 338),
+        (127, 104, 176, 147, 218, 350),
+        (123, 98, 172, 140, 212, 340),
+        (126, 90, 176, 132, 218, 346),
+    ]
+    x0, y0, x1, y1, start, end = boxes[frame]
+    draw.arc((x0, y0, x1, y1), start, end, fill=(8, 9, 10, 235), width=10)
+    draw.arc((x0 + 2, y0 + 2, x1 - 2, y1 - 2), start, end, fill=(47, 47, 48, 235), width=6)
+
+
+def add_speed_lines(canvas: Image.Image, frame: int) -> None:
+    if frame in {0, 2, 4}:
+        return
+    draw = ImageDraw.Draw(canvas)
+    for i, length in enumerate((22, 15, 9)):
+        y = 119 + i * 18
+        draw.line((29, y, 29 - length, y + 1), fill=(91, 104, 98, 95), width=3)
+
+
 def add_dig_particles(canvas: Image.Image, frame: int) -> None:
     if frame not in {1, 2, 4}:
         return
@@ -363,6 +487,26 @@ def build_override_frame(row: int, frame: int, sprite: Image.Image) -> Image.Ima
     if row == 4:
         add_hop_shadow(canvas, min(frame, 4))
     paste_center(canvas, sprite)
+    return canvas.resize((CELL_W // 2, CELL_H // 2), Image.Resampling.NEAREST).resize((CELL_W, CELL_H), Image.Resampling.NEAREST)
+
+
+def build_running_from_jump_frame(frame: int, jump_sprites: list[Image.Image]) -> Image.Image:
+    canvas = Image.new("RGBA", (CELL_W, CELL_H), (255, 255, 255, 0))
+    sequence = [0, 1, 2, 1, 4, 2]
+    sprite = jump_sprites[sequence[frame]]
+    add_side_run_shadow(canvas, frame)
+    add_speed_lines(canvas, frame)
+    # Reuse the stronger four-legged jumping poses, but pin them close to the
+    # ground and stretch forward so they read as a run instead of a hop.
+    sprite = transform(
+        sprite,
+        sx=[1.05, 1.10, 1.14, 1.16, 1.08, 1.12][frame],
+        sy=[0.96, 0.93, 0.90, 0.88, 0.94, 0.91][frame],
+        angle=[0, -2, -4, -5, 1, -3][frame],
+    )
+    paste_center(canvas, sprite, dx=[-4, 0, 4, 8, 1, 5][frame], dy=[9, 7, 9, 11, 8, 10][frame])
+    add_side_run_paws(canvas, frame)
+    add_focus_dots(canvas, frame)
     return canvas.resize((CELL_W // 2, CELL_H // 2), Image.Resampling.NEAREST).resize((CELL_W, CELL_H), Image.Resampling.NEAREST)
 
 
@@ -401,14 +545,23 @@ def build_frame(row_sprites: list[Image.Image], row: int, frame: int) -> Image.I
         paste_center(canvas, sprite, dy=12 + [0, 1, 2, 1, 0, 0, -1, 0][frame])
         add_failed_blush(canvas)
     elif row == 6:  # waiting: curious head tilt and tongue peek
+        add_waiting_tail_swish(canvas, frame)
         angle = [-3, -6, -3, 3, 6, 3][frame]
-        sprite = transform(base, angle=angle)
-        paste_center(canvas, sprite, dy=1)
+        sprite = transform(base, sx=1.0 + [0.0, -0.01, 0.0, 0.01, 0.0, -0.01][frame], sy=1.0, angle=angle)
+        paste_center(canvas, sprite, dx=[0, -2, -1, 1, 2, 1][frame], dy=[1, 0, 1, 0, 1, 1][frame])
+        add_waiting_paw_tap(canvas, frame)
         add_question_marks(canvas, frame)
-    elif row == 7:  # running: focused work state, not directional travel
-        sprite = transform(base, sx=1.0 + 0.025 * phase, sy=1.0 - 0.015 * phase, angle=[0, -3, 0, 3, 0, -2][frame])
-        paste_center(canvas, sprite, dx=[0, -3, 0, 3, 0, -2][frame], dy=int(2 * phase))
-        add_dig_particles(canvas, frame)
+    elif row == 7:  # running: side gallop with readable four-paw motion
+        side = row_sprites[1]
+        add_side_run_shadow(canvas, frame)
+        add_side_run_tail(canvas, frame)
+        bob = [4, -6, 0, -9, 4, -3][frame]
+        stretch = [1.16, 1.08, 1.12, 1.22, 1.14, 1.09][frame]
+        height = [0.86, 0.92, 0.88, 0.84, 0.87, 0.91][frame]
+        sprite = transform(side, sx=stretch, sy=height, angle=[-5, -2, -4, -7, -5, -3][frame])
+        paste_center(canvas, sprite, dx=[-3, 1, 4, 7, 2, -1][frame], dy=bob + 8)
+        add_side_run_paws(canvas, frame)
+        add_speed_lines(canvas, frame)
         add_focus_dots(canvas, frame)
     else:  # review: alert, bright-eyed, ready for attention
         sprite = transform(base, sx=1.0 + 0.02 * phase, sy=1.0, angle=[0, -2, -3, -2, 0, 1][frame])
@@ -513,7 +666,9 @@ def main() -> None:
     sheet = Image.new("RGBA", (CELL_W * COLS, CELL_H * ROWS), (255, 255, 255, 0))
     for row in range(ROWS):
         for col in range(USED_FRAMES_BY_ROW[row]):
-            if row in overrides:
+            if row == 7 and 4 in overrides:
+                frame = build_running_from_jump_frame(col, overrides[4])
+            elif row in overrides:
                 frame = build_override_frame(row, col, overrides[row][col])
             else:
                 frame = build_frame(row_sprites, row, col)
