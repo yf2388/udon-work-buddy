@@ -30,26 +30,32 @@ Recommended agent workflow:
    cd udon-work-buddy
    ```
 
-2. Run the installer from the repository root.
+2. Quit Codex completely before running the installer. This prevents the running app from overwriting the new `custom:udon` selection with its old in-memory avatar state.
+
+3. Run the installer from the repository root.
 
    ```bash
    ./tools/install_udon_pet.sh
    ```
 
-3. Verify the installed files.
+4. Verify the installed files.
 
    ```bash
    test -f "${CODEX_HOME:-$HOME/.codex}/pets/udon/pet.json"
    test -f "${CODEX_HOME:-$HOME/.codex}/pets/udon/spritesheet.webp"
    ```
 
-4. If Codex is already running and the pet does not appear immediately, restart Codex or open the appearance/pet settings once to refresh the avatar overlay.
+5. Start Codex again.
+
+If Codex is already running, the installer exits before writing by default. This is intentional. To override it, run `./tools/install_udon_pet.sh --force-running`, then open appearance/pet settings or restart Codex if the pet does not refresh.
 
 Non-interactive one-liner:
 
 ```bash
 git clone git@github.com:yf2388/udon-work-buddy.git && cd udon-work-buddy && ./tools/install_udon_pet.sh
 ```
+
+The one-liner expects Codex to be closed first.
 
 If SSH access to GitHub is not configured, use the HTTPS URL instead:
 
@@ -64,6 +70,7 @@ Notes for Codex agents:
 - Do not initialize git in the parent workspace when configuring this pet.
 - Do not copy unrelated workspace files into this repository.
 - The installer writes `pet.json` and `spritesheet.webp` into the Codex pet directory, then sets `selected-avatar-id` to `custom:udon`.
+- The installer refuses to run while Codex is open unless `--force-running` is passed, because the app can cache and later rewrite the old avatar selection.
 - Respect `CODEX_HOME` when it is set; otherwise use `$HOME/.codex`.
 - Ask for elevated filesystem permission only if writing to the Codex home is blocked by the local sandbox.
 
@@ -119,13 +126,13 @@ The persisted setting should be checked before assuming the spritesheet is wrong
 
 Codex stores `selected-avatar-id` in its persisted atom state under `.codex-global-state.json`, but the running app also keeps this state in memory. If a script edits `.codex-global-state.json` while Codex is already running, the app may later flush its old in-memory value back to disk and remove the new `custom:udon` selection.
 
-The most reliable sequence is:
+The required default sequence is:
 
 1. Quit Codex.
 2. Run `./tools/install_udon_pet.sh`.
 3. Start Codex again.
 
-If Codex must stay open, run the installer, then immediately open Appearance/Pet settings or restart Codex if the overlay still shows the old pet.
+If Codex must stay open, run `./tools/install_udon_pet.sh --force-running`, then immediately open Appearance/Pet settings or restart Codex if the overlay still shows the old pet.
 
 Check whether Codex rewrote the value:
 
